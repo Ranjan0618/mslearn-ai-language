@@ -2,6 +2,9 @@ from dotenv import load_dotenv
 import os
 
 # Import namespaces
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.language.questionanswering import QuestionAnsweringClient
+
 
 
 def main():
@@ -14,15 +17,29 @@ def main():
         ai_deployment_name = os.getenv('QA_DEPLOYMENT_NAME')
 
         # Create client using endpoint and key
-
+        credential = AzureKeyCredential(ai_key)
+        client = QuestionAnsweringClient(endpoint=ai_endpoint, credential=credential)  
+        
 
         # Submit a question and display the answer
+        while True:
+            user_question = input('\nQuestion:\n')
+            if user_question.lower() == "quit":                
+                break
+            response = client.get_answers(question=user_question,        project_name=ai_project_name,
+            deployment_name=ai_deployment_name
+            )  
+            print(f"Question: {user_question}")
+            for answer in response.answers:
+                print(f"Answer: {answer.answer}")
+                print(f"Confidence Score: {answer.confidence}")
+                print(f"Source: {answer.source}\n") 
 
+    
 
 
     except Exception as ex:
         print(ex)
-
 
 if __name__ == "__main__":
     main()
